@@ -1,0 +1,23 @@
+AcademiaLink Frontend - V1 Functions + V2 UI/UX + UX Fixes
+
+This build keeps the V1 functional/API behavior while using the V2 visual system, with the following fixes:
+
+1. Tailwind Vite plugin/config included.
+2. Replaced stale V1 utility tokens across the frontend with the current V2 token system.
+3. Rebuilt the Features page using valid current tokens so /features renders correctly.
+4. Redesigned the footer with a readable dark glass-style presentation instead of the washed-out invalid-token background.
+5. Added a more comfortable glassy landing/intro hero with blur, glow, and translucent panels.
+6. Set all application text to Times New Roman.
+7. Skill Assessment is now STUDENT-only at the frontend route level. Non-students are redirected to /dashboard.
+8. Skill Assessment Previous button is functional and preserves selected answers when moving backward/forward.
+9. Assessment results now include a "What to learn next" learning roadmap based on the returned skill level, plus a link to Learning Recommendations.
+10. V1 Button form behavior is preserved by not forcing type="button"; explicit type values still work.
+
+Run:
+  npm install
+  npm run dev
+
+Expected backend API:
+  http://localhost:5000/api
+
+Note: The build was not run in this environment because dependencies are not installed in the generated ZIP. After npm install, run npm run build to verify locally.

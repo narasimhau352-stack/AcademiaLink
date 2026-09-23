@@ -1,0 +1,306 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  FACULTY
+  INDUSTRY
+  ADMIN
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(STUDENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projects               Project[]
+  studentProfile         StudentProfile?
+  assessmentResults      AssessmentResult[]
+  industryRoles          IndustryRole[]
+  internships            Internship[]
+  internshipApplications InternshipApplication[]
+  studentCertifications  StudentCertification[]
+  studentExperiences     StudentExperience[]
+  notifications          Notification[]
+}
+
+enum ProjectStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CLOSED
+}
+
+model Project {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String        @db.Text
+  skills      String?
+  status      ProjectStatus @default(OPEN)
+
+  creatorId Int
+  creator   User @relation(fields: [creatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model StudentProfile {
+  id                Int     @id @default(autoincrement())
+  userId            Int     @unique
+  education         String?
+  branch            String?
+  graduationYear    Int?
+  careerGoal        String?
+  location          String?
+  isPortfolioPublic Boolean @default(false)
+
+  user   User           @relation(fields: [userId], references: [id])
+  skills StudentSkill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id                Int                  @id @default(autoincrement())
+  name              String               @unique
+  category          String?
+  studentSkills     StudentSkill[]
+  questions         AssessmentQuestion[]
+  assessmentResults AssessmentResult[]
+  industryRoles     IndustryRoleSkill[]
+  learningResources LearningResource[]
+  internshipSkills  InternshipSkill[]
+}
+
+model StudentSkill {
+  id        Int        @id @default(autoincrement())
+  profileId Int
+  skillId   Int
+  level     SkillLevel
+
+  profile StudentProfile @relation(fields: [profileId], references: [id])
+  skill   Skill          @relation(fields: [skillId], references: [id])
+
+  @@unique([profileId, skillId])
+}
+
+enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model AssessmentQuestion {
+  id      Int @id @default(autoincrement())
+  skillId Int
+
+  question      String             @db.Text
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String
+  difficulty    QuestionDifficulty @default(EASY)
+
+  skill Skill @relation(fields: [skillId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model AssessmentResult {
+  id Int @id @default(autoincrement())
+
+  userId  Int
+  skillId Int
+
+  score          Int
+  totalQuestions Int
+  percentage     Float
+  level          SkillLevel
+
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  skill Skill @relation(fields: [skillId], references: [id])
+}
+
+model IndustryRole {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String? @db.Text
+  location    String?
+  experience  Int     @default(0)
+  education   String?
+
+  creatorId Int
+  creator   User @relation(fields: [creatorId], references: [id])
+
+  requiredSkills IndustryRoleSkill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model IndustryRoleSkill {
+  id Int @id @default(autoincrement())
+
+  roleId  Int
+  skillId Int
+  level   SkillLevel
+
+  role  IndustryRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  skill Skill        @relation(fields: [skillId], references: [id])
+
+  @@unique([roleId, skillId])
+}
+
+enum LearningResourceType {
+  COURSE
+  CERTIFICATION
+  WORKSHOP
+  TUTORIAL
+  PRACTICE
+}
+
+model LearningResource {
+  id          Int                  @id @default(autoincrement())
+  title       String
+  description String?              @db.Text
+  type        LearningResourceType @default(COURSE)
+  provider    String?
+  url         String?
+  skillId     Int
+
+  skill Skill @relation(fields: [skillId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum InternshipType {
+  SKILL_BASED
+  LEARNING_ORIENTED
+}
+
+enum InternshipStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW
+  SELECTED
+  REJECTED
+}
+
+model Internship {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String           @db.Text
+  location    String?
+  duration    String?
+  stipend     String?
+  type        InternshipType   @default(SKILL_BASED)
+  status      InternshipStatus @default(OPEN)
+
+  creatorId Int
+  creator   User @relation(fields: [creatorId], references: [id])
+
+  requiredSkills InternshipSkill[]
+  applications   InternshipApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InternshipSkill {
+  id           Int        @id @default(autoincrement())
+  internshipId Int
+  skillId      Int
+  level        SkillLevel
+
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  skill      Skill      @relation(fields: [skillId], references: [id])
+
+  @@unique([internshipId, skillId])
+}
+
+model InternshipApplication {
+  id           Int               @id @default(autoincrement())
+  internshipId Int
+  studentId    Int
+  status       ApplicationStatus @default(SUBMITTED)
+
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([internshipId, studentId])
+}
+
+model StudentCertification {
+  id            Int       @id @default(autoincrement())
+  studentId     Int
+  title         String
+  issuer        String?
+  issueDate     DateTime?
+  credentialUrl String?
+
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentExperience {
+  id          Int       @id @default(autoincrement())
+  studentId   Int
+  company     String
+  role        String
+  description String?   @db.Text
+  startDate   DateTime?
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  message   String
+  type      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

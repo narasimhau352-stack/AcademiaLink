@@ -1,0 +1,35 @@
+AcademiaLink Frontend Update
+
+This version preserves the existing Version 2 UI/UX and Version 1 functionality while adding:
+
+1. Collapsible main navigation drawer:
+   - Main navigation is hidden by default.
+   - A menu button in the top bar opens Home, About, Features and role-specific navigation.
+   - Clicking a navigation item closes the drawer.
+   - Notifications, profile, settings and logout remain available for authenticated users.
+
+2. Skill assessment access:
+   - /skill-assessment is restricted to STUDENT users in App.jsx.
+   - Previous/Next navigation preserves selected answers.
+
+3. Assessment answer review:
+   - After submission, the result screen renders an Answer Review section.
+   - It shows the student's answer, correct answer, and right/wrong state when the assessment API provides an answer key/review.
+   - The UI supports common response fields such as answerReview, answersReview, review, correctAnswer, correctOption, correctKey and answerKey.
+   - If the backend intentionally hides the answer key, the UI does not invent answers; it displays a clear message instead.
+
+4. Learning guidance:
+   - The existing "What to learn next" section remains after assessment results.
+
+5. UI/UX:
+   - Existing glass hero, purple design system and Times New Roman typography are preserved.
+
+6. Role route cleanup:
+   - Admin and Industry protected routes use the ProtectedRoute `roles` prop correctly.
+
+Run:
+  npm install
+  npm run dev
+
+For production verification:
+  npm run build
