@@ -28,3 +28,6 @@ Thumbs.db
 prisma/*.db
 prisma/*.db-journal
 .vercel
+
+# Local Netlify folder
+.netlify
