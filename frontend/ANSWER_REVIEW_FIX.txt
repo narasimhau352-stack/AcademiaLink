@@ -1,0 +1,10 @@
+IMPORTANT ANSWER REVIEW FIX
+
+The previous frontend contained guessed/local answer fallbacks. Those have been removed.
+The frontend now ONLY displays a correct answer when the assessment backend provides:
+- answerReview[] with correctAnswer/correctOption/correctKey/answerKey, or
+- an explicit isCorrect boolean.
+
+This prevents incorrect hard-coded answers such as marking Dictionary as List or len([10,20,30]) as 2.
+
+For complete answer review, the backend assessment submit endpoint must return answerReview for each submitted question.
